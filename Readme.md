@@ -30,28 +30,28 @@ git clone https://github.com/your-username/vidstream.git
 ```bash
 cd vidstream
 ```
-3. Install Dependencies
+### 3. Install Dependencies
 ```bash
 
 npm install
 ```
-4. Run the Development Server
+### 4. Run the Development Server
 ```bash
 
 npm run dev
 ```
 ---
 
-🧰 Tech Stack
-Backend: Node.js, Express.js
+## 🧰 Tech Stack
+**Backend**: Node.js, Express.js
 
-Database: MongoDB Atlas
+**Database**: MongoDB Atlas
 
-ODM: Mongoose
+**ODM**: Mongoose
 
-Cloud Storage: Cloudinary
+**Cloud Storage**: Cloudinary
 
-Authentication: JWT (JSON Web Token)
+**Authentication**: JWT (JSON Web Token)
 
 
 
