@@ -7,43 +7,51 @@ It combines robust media management, secure user authentication, and a modular a
 
 ## 🚀 Features
 
-- 🔐 Secure User Authentication  
-- 📁 Cloud Media Upload (Video + Thumbnail)  
-- 📊 Video Analytics & Views Tracking  
+- 🔐 Secure User Authentication (JWT-based)  
+- 📁 Cloud Media Uploads via Cloudinary (video & thumbnail)  
+- 📊 Video Management (Upload, Edit, Delete, Toggle Publish)  
+- 👥 Subscription System (Follow creators)  
+- 💬 Comment & Like System  
+- 🔎 Full-text Search, Sorting, and Pagination  
 - 🧵 Modular & Scalable Code Structure  
-- 📦 MongoDB-based Video Data Management  
+- 📦 MongoDB-based storage using Mongoose  
+- 🌐 RESTful API architecture  
 
 ---
 
-## 🛠️ Installation
-
-Follow the steps below to set up the project locally:
+## 🛠️ Installation & Setup
 
 ### 1. Clone the Repository
 
 ```bash
- git clone https://github.com/your-username/vidstream.git
-2. Navigate to the Project Directory
-bash
+git clone https://github.com/your-username/vidstream.git
+```
+### 2. Navigate to the Project Directory
+```bash
 cd vidstream
+```
 3. Install Dependencies
-bash
+```bash
+
 npm install
+```
 4. Run the Development Server
-bash
+```bash
+
 npm run dev
+```
+---
 
 🧰 Tech Stack
-Node.js + Express.js
+Backend: Node.js, Express.js
 
-MongoDB Atlas
+Database: MongoDB Atlas
 
-Mongoose ODM
+ODM: Mongoose
 
-Cloudinary (for media uploads)
+Cloud Storage: Cloudinary
 
-JWT Authentication
-
+Authentication: JWT (JSON Web Token)
 
 
 
