@@ -24,7 +24,7 @@ It combines robust media management, secure user authentication, and a modular a
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/vidstream.git
+git clone https://github.com/Ishita-01/VidStream.git
 ```
 ### 2. Navigate to the Project Directory
 ```bash
@@ -52,6 +52,7 @@ npm run dev
 **Cloud Storage**: Cloudinary
 
 **Authentication**: JWT (JSON Web Token)
+
 
 
 
