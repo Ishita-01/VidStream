@@ -1,5 +1,5 @@
 import mongoose, {isValidObjectId} from "mongoose"
-import {Playlist} from "../models/playlist.model.js"
+import {Playlist} from "../models/playlist.models.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
@@ -7,8 +7,8 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 
 const createPlaylist = asyncHandler(async (req, res) => {
     const {name, description} = req.body
-    if(!name.tirm() || !description.trim()){
-        throw new ApiError(404,"All fields are requires")
+    if(!name.trim() || !description.trim()){
+        throw new ApiError(404,"All fields are required")
     }
 
     const playlist = await Playlist.create({
@@ -19,7 +19,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(new ApiResponse(200,"Playlist created successfully",playlist))
+        .json(new ApiResponse(200, playlist, "Playlist created successfully"))
     
 })
 
@@ -34,13 +34,13 @@ const getUserPlaylists = asyncHandler(async (req, res) => {
         owner: userId,
     });
 
-    if(playlist.length()=== 0){
+    if(playlist.length === 0){
         throw new ApiError(404,"Playlist not found")
     }
 
     return res
         .status(200)
-        .json(new ApiResponse(200,"Playlist fetched successfully",playlist))
+        .json(new ApiResponse(200, playlist, "Playlist fetched successfully"))
 })
 
 
@@ -131,7 +131,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(
-            new ApiResponse(200,"playlist deleted successfully")
+            new ApiResponse(200, {}, "playlist deleted successfully")
         );
 })
 
@@ -143,7 +143,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
         throw new ApiError(404,"Playlist Not found");
     }
 
-    if(!name.trim() || description.trim()){
+    if(!name.trim() || !description.trim()){
         throw new ApiError(404,"All fields are required")
     }
 

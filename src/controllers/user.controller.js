@@ -4,6 +4,7 @@ import {User} from "../models/user.models.js"
 import { uploadOnCloudinary,deleteFromCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt  from "jsonwebtoken";
+import mongoose from "mongoose";
 
 
 
@@ -50,8 +51,8 @@ const registerUser = asyncHandler( async (req,res) => {
 
     //handling images 
 
-    const avatarLocalPath = req.files?.avatar[0]?.path
-    const coverLocalPath = req.files?.coverImage[0]?.path
+    const avatarLocalPath = req.files?.avatar?.[0]?.path
+    const coverLocalPath = req.files?.coverImage?.[0]?.path
 
     if(!avatarLocalPath){
         throw new ApiError(400,"Avatar file is missing")
@@ -75,23 +76,29 @@ const registerUser = asyncHandler( async (req,res) => {
 
     }
 
-    let coverIamge;
+    let coverImage;
     try {
-        coverIamge = await uploadOnCloudinary(coverLocalPath)
-        console.log("Uploaded coverIamge",coverIamge)
+        if(coverLocalPath) {
+            coverImage = await uploadOnCloudinary(coverLocalPath)
+            console.log("Uploaded coverImage",coverImage)
+        }
     } catch (error) {
-        console.log("Error uploading coverIamge",error)
-        throw new ApiError(500,"failed to upload coverIamge")
+        console.log("Error uploading coverImage",error)
+        throw new ApiError(500,"failed to upload coverImage")
 
     }
 
+
+    if(!avatar){
+        throw new ApiError(400, "Avatar upload failed. Please check your image or Cloudinary configuration.");
+    }
 
     //construct new user
     try {
         const user = await User.create({
             fullname,
             avatar:avatar.url,
-            coverIamge: coverIamge?.url || "",
+            coverImage: coverImage?.url || "",
             email,
             password,
             username: username.toLowerCase()
@@ -116,13 +123,11 @@ const registerUser = asyncHandler( async (req,res) => {
             await deleteFromCloudinary(avatar.public_id)
         }
 
-        if(coverIamge){
-            await deleteFromCloudinary(coverIamge.public_id)
+        if(coverImage){
+            await deleteFromCloudinary(coverImage.public_id)
         }
 
-        if(!createdUser){
-            throw new ApiError(500,"Something went wrong while registering the user and images were deleted")
-        }
+        throw new ApiError(500, error?.message || "Something went wrong while registering the user and images were deleted")
     }
 
 
@@ -400,7 +405,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
         },
         {
             $project: {
-                fullName: 1,
+                fullname: 1,
                 username: 1,
                 subscribersCount: 1,
                 channelsSubscribedToCount: 1,
@@ -424,7 +429,7 @@ const getUserChannelProfile = asyncHandler(async(req, res) => {
     )
 })
 
-const getWatchHistory = await asyncHandler(async(req, res) => {
+const getWatchHistory = asyncHandler(async(req, res) => {
     const user = await User.aggregate([
         {
             $match: {
@@ -447,7 +452,7 @@ const getWatchHistory = await asyncHandler(async(req, res) => {
                             pipeline: [
                                 {
                                     $project: {
-                                        fullName: 1,
+                                        fullname: 1,
                                         username: 1,
                                         avatar: 1
                                     }
@@ -465,8 +470,9 @@ const getWatchHistory = await asyncHandler(async(req, res) => {
                 ]
             }
         }
-    ])
-     return res
+    ]);
+
+    return res
     .status(200)
     .json(
         new ApiResponse(

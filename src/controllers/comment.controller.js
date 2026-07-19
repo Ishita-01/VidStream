@@ -1,5 +1,5 @@
 import mongoose, { isValidObjectId } from "mongoose"
-import {Comment} from "../models/comment.model.js"
+import {Comment} from "../models/comment.models.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
@@ -19,20 +19,29 @@ const getVideoComments = asyncHandler(async (req, res) => {
 
     
 
-    const comments = await Comment.aggregate([
+    const commentsAggregate = Comment.aggregate([
         {
             $match: {
                 video: new mongoose.Types.ObjectId(videoId)
             }
         },
         {
-            $sort:{createdAt:-1},
+            $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner"
+            }
         },
-    
-    
-    ]) ;
+        {
+            $unwind: "$owner"
+        },
+        {
+            $sort:{createdAt:-1}
+        }
+    ]);
 
-    const paginate =  await Comment.aggregatePaginate(comments,{
+    const paginate = await Comment.aggregatePaginate(commentsAggregate, {
         page:parseInt(page),
         limit:parseInt(limit)
     });
@@ -50,7 +59,7 @@ const addComment = asyncHandler(async (req, res) => {
     const {videoId} = req.params;
     const {content} = req.body;
 
-    if(!videoId || !mongoose.ObjectId.isValid(videoId)){
+    if(!videoId || !isValidObjectId(videoId)){
         throw new ApiError(400,"Invalid videoId");
     }
     if(!content){
@@ -60,7 +69,7 @@ const addComment = asyncHandler(async (req, res) => {
     const comment = await Comment.create({
         content,
         video: videoId,
-        owner:req.user.id,
+        owner:req.user?._id,
     });
 
     if(!comment){
@@ -90,7 +99,7 @@ const updateComment = asyncHandler(async (req, res) => {
         throw new ApiError(404,"Comment not found");
     }
 
-    if(existingComment.owner.toString() !== req.user.id.toString()){
+    if(existingComment.owner.toString() !== req.user?._id.toString()){
         throw new ApiError(401,"You don't have permission to update this comment")
     }
 
@@ -120,7 +129,7 @@ const deleteComment = asyncHandler(async (req, res) => {
         throw new ApiError(404,"Comment not found");
     }
 
-    if(existingComment.owner.toString() !== req.user.id.toString()){
+    if(existingComment.owner.toString() !== req.user?._id.toString()){
         throw new ApiError(401,"Unable to delete the comment");
     }
 

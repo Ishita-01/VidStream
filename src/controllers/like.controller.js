@@ -1,19 +1,19 @@
 import mongoose, {isValidObjectId} from "mongoose"
-import {Like} from "../models/like.model.js"
+import {Like} from "../models/like.models.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const {videoId} = req.params;
-    const user = req.user.id;
+    const user = req.user?._id;
     if(!videoId || !mongoose.Types.ObjectId.isValid(videoId)){
         throw new ApiError(404,"Video not found");
     }
 
     const existingLike = await Like.findOne({
         video: videoId,
-        LikeBy: user
+        likedBy: user
     });
     if(existingLike){
         await Like.findByIdAndDelete(existingLike?._id)
@@ -26,7 +26,7 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
     const newLike = await Like.create({
         video:videoId,
-        LikeBy: user
+        likedBy: user
     })
     return res
             .status(200)
@@ -38,14 +38,14 @@ const toggleVideoLike = asyncHandler(async (req, res) => {
 
 const toggleCommentLike = asyncHandler(async (req, res) => {
     const {commentId} = req.params
-    const user = req.user.id;
+    const user = req.user?._id;
     if(!commentId || !mongoose.Types.ObjectId.isValid(commentId)){
         throw new ApiError(404,"Comment not found");
     }
 
     const existingLike = await Like.findOne({
-        Comment: commentId,
-        LikeBy: user
+        comment: commentId,
+        likedBy: user
     });
     if(existingLike){
         await Like.findByIdAndDelete(existingLike?._id)
@@ -57,8 +57,8 @@ const toggleCommentLike = asyncHandler(async (req, res) => {
     }
 
     const newLike = await Like.create({
-        Comment: commentId,
-        LikeBy: user
+        comment: commentId,
+        likedBy: user
     })
     return res
             .status(200)
@@ -75,7 +75,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     const likedVideos = await Like.aggregate([
         {
             $match:{
-                likeBy:new mongoose.Types.ObjectId(req.user?._id)
+                likedBy:new mongoose.Types.ObjectId(req.user?._id)
             }
         },
         {

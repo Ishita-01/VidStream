@@ -1,5 +1,6 @@
 import mongoose, {isValidObjectId} from "mongoose"
-import {Video} from "../models/video.model.js"
+import {User} from "../models/user.models.js"
+import {Video} from "../models/video.models.js"
 import {Like} from "../models/like.models.js"
 import {Comment} from "../models/comment.models.js"
 import {ApiError} from "../utils/ApiError.js"
@@ -129,16 +130,10 @@ const publishAVideo = asyncHandler(async (req, res) => {
         title,
         description,
         duration:videoFile.duration,
-        videoFile: {
-            url: videoFile.url,
-            public_id: videoFile.public_id
-        },
-        thumbnail: {
-            url: thumbnail.url,
-            public_id: thumbnail.public_id
-        },
+        videoFile: videoFile.url,
+        thumbnail: thumbnail.url,
         owner: req.user?._id,
-        isPublished: false
+        isPublished: true
     })
 
     const uploadedVideo = await Video.findById(video._id)
@@ -176,18 +171,36 @@ const getVideoById = asyncHandler(async (req, res) => {
       {
         $project: {
           username: "$userDetails.username",
+          ownerAvatar: "$userDetails.avatar",
+          owner: 1,
           thumbnail: 1,
           description: 1,
           title: 1,
           views: 1,
           duration: 1,
           videoFile: 1,
+          createdAt: 1,
         },
       },
     ]);
 
     if (!video || video.length === 0) {
       throw new ApiError(404, "video not found");
+    }
+
+    // Increment views
+    await Video.findByIdAndUpdate(videoId, { $inc: { views: 1 } });
+
+    // Add to watch history if user is logged in
+    if (req.user?._id) {
+        await User.findByIdAndUpdate(
+            req.user._id,
+            {
+                $addToSet: {
+                    watchHistory: new mongoose.Types.ObjectId(videoId)
+                }
+            }
+        );
     }
 
     return res

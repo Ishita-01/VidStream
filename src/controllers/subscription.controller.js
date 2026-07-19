@@ -1,6 +1,6 @@
 import mongoose, {isValidObjectId} from "mongoose"
-import {User} from "../models/user.model.js"
-import { Subscription } from "../models/subscription.model.js"
+import {User} from "../models/user.models.js"
+import { Subscription } from "../models/subscription.models.js"
 import {ApiError} from "../utils/ApiError.js"
 import {ApiResponse} from "../utils/ApiResponse.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
@@ -13,21 +13,21 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         throw new ApiError(404,"Channel not found")
     }
 
-    const isSubscribed = await Subscription.findByOne({
-        subscriber:req.user.id,
+    const isSubscribed = await Subscription.findOne({
+        subscriber:req.user?._id,
         channel:channelId
     });
     if(isSubscribed){
-        await Subscription.findByIdAndDelete(channelId);
+        await Subscription.findByIdAndDelete(isSubscribed._id);
         return res
             .status(200)
             .json(
-                new ApiResponse(200,"Unsubscribed successfully")
+                new ApiResponse(200, {}, "Unsubscribed successfully")
             )
     }
 
     const newSubscription = await Subscription.create({
-        subscriber: req.user?.id,
+        subscriber: req.user?._id,
         channel:channelId
     });
 
@@ -37,7 +37,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
 
     return res
         .status(200)
-        .json(200,"Subscribed successfully",newSubscription)
+        .json(new ApiResponse(200, newSubscription, "Subscribed successfully"));
 });
 
 // controller to return subscriber list of a channel
