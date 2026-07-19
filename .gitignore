@@ -118,4 +118,5 @@ dist
 .pnp.*
 
 .DS_Store
-public/temp/
+public/temp/*
+!public/temp/.gitkeep
